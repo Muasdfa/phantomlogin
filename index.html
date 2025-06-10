@@ -28,7 +28,7 @@
       font-family: 'Segoe UI', Roboto, sans-serif;
       text-align: center;
     }
-    h1 {
+    h1#main-heading {
       margin-bottom: 2rem;
       font-size: 2rem;
     }
@@ -79,7 +79,7 @@
   </style>
 </head>
 <body>
-  <h1>Connect to Account</h1>
+  <h1 id="main-heading">Connect to Account</h1>
   <!-- Authentication Card -->
   <div id="auth" class="card">
     <h2>Sign Up / Log In</h2>
@@ -121,6 +121,7 @@
     const authMsg = document.getElementById('auth-msg');
     const authDiv = document.getElementById('auth');
     const appDiv = document.getElementById('app');
+    const header = document.getElementById('main-heading');
     const userEmailSpan = document.getElementById('user-email');
     const signupBtn = document.getElementById('signup');
     const loginBtn = document.getElementById('login');
@@ -148,10 +149,12 @@
       if (user) {
         authDiv.style.display = 'none';
         appDiv.style.display = 'flex';
+        header.style.display = 'none';
         userEmailSpan.textContent = user.email;
       } else {
         authDiv.style.display = 'flex';
         appDiv.style.display = 'none';
+        header.style.display = 'block';
       }
     });
 
