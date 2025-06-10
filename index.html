@@ -110,7 +110,15 @@
 
     <script>
       // Initialize Firebase
-      const firebaseConfig = { /* your config */ };
+      const firebaseConfig = {
+        apiKey: "AIzaSyATdSh9jZBAvR6PjV7X-3VVKWZDB2Tld1I",
+        authDomain: "vetra-login-39106.firebaseapp.com",
+        projectId: "vetra-login-39106",
+        storageBucket: "vetra-login-39106.firebasestorage.app",
+        messagingSenderId: "1080730669130",
+        appId: "1:1080730669130:web:fe6bf5694779f4096f16b3",
+        measurementId: "G-0T7NT0E96Z"
+      };
       firebase.initializeApp(firebaseConfig);
       const auth = firebase.auth();
       const db = firebase.firestore();
@@ -144,10 +152,10 @@
       auth.onAuthStateChanged(user => {
         if (user) {
           authDiv.style.display = 'none';
-          appDiv.style.display = ''; // Fall back to CSS display:flex
+          appDiv.style.display = ''; // uses CSS display:flex
           userEmailSpan.textContent = user.email;
         } else {
-          authDiv.style.display = ''; // Fall back to CSS display:flex
+          authDiv.style.display = ''; // uses CSS display:flex
           appDiv.style.display = 'none';
         }
       });
