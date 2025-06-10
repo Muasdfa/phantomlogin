@@ -47,7 +47,7 @@
         font-size: 1rem;
       }
       /* Buttons with 6px border */
-      #auth button {
+      #auth button, #app button {
         width: 100%;
         padding: 0.75rem;
         margin-top: 0.5rem;
@@ -59,7 +59,7 @@
         cursor: pointer;
         transition: background 0.2s;
       }
-      #auth button:hover {
+      #auth button:hover, #app button:hover {
         background: #4F46E5;
       }
       /* Message text */
@@ -71,7 +71,18 @@
       /* Hide app area until login */
       #app {
         display: none;
+        background: #1A1A1A;
+        padding: 2rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        width: 320px;
         text-align: center;
+      }
+      #app h3 {
+        margin-top: 1rem;
+      }
+      #wallet-info, #balance, #deposit-msg {
+        margin: 0.75rem 0;
       }
     </style>
   </head>
@@ -88,16 +99,20 @@
     </div>
 
     <div id="app">
-      <p>Welcome, <span id="user-email"></span>!  <button id="logout">Log Out</button></p>
+      <p>Welcome, <span id="user-email"></span>!</p>
+      <button id="logout">Log Out</button>
+
       <button id="connect-wallet">Connect Phantom Wallet</button>
       <p id="wallet-info"></p>
+
       <h3>Your Balance</h3>
       <p id="balance">-- SOL</p>
-      <p>To deposit, simply send SOL to your Phantom address above.</p>
+
+      <p id="deposit-msg">Connect with Phantom to deposit money.</p>
     </div>
 
     <script>
-    // 1) Initialize Firebase
+    // Initialize Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyATdSh9jZBAvR6PjV7X-3VVKWZDB2Tld1I",
       authDomain: "vetra-login-39106.firebaseapp.com",
@@ -111,7 +126,7 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // 2) Element references
+    // Element refs
     const emailInput    = document.getElementById("email");
     const passwordInput = document.getElementById("password");
     const authMsg       = document.getElementById("auth-msg");
@@ -124,28 +139,19 @@
     const connectBtn    = document.getElementById("connect-wallet");
     const walletInfoP   = document.getElementById("wallet-info");
     const balanceP      = document.getElementById("balance");
+    const depositMsgP   = document.getElementById("deposit-msg");
 
-    // 3) Auth handlers
-    signupBtn.onclick = () => {
-      auth.createUserWithEmailAndPassword(
-        emailInput.value,
-        passwordInput.value
-      ).then(() => {
-        authMsg.textContent = "Signed up! Please log in.";
-      }).catch(err => {
-        authMsg.textContent = err.message;
-      });
-    };
-    loginBtn.onclick = () => {
-      auth.signInWithEmailAndPassword(
-        emailInput.value,
-        passwordInput.value
-      ).catch(err => {
-        authMsg.textContent = err.message;
-      });
-    };
+    // Auth handlers
+    signupBtn.onclick = () => auth.createUserWithEmailAndPassword(
+      emailInput.value, passwordInput.value
+    ).then(() => authMsg.textContent = "Signed up! Please log in.")
+     .catch(err => authMsg.textContent = err.message);
 
-    // 4) Auth state listener
+    loginBtn.onclick = () => auth.signInWithEmailAndPassword(
+      emailInput.value, passwordInput.value
+    ).catch(err => authMsg.textContent = err.message);
+
+    // Auth state listener
     auth.onAuthStateChanged(user => {
       if (user) {
         authDiv.style.display = "none";
@@ -157,43 +163,56 @@
       }
     });
 
-    // 5) Connect Phantom and fetch pubkey
+    // Wallet connect/disconnect logic
     connectBtn.onclick = async () => {
-      if (window.solana && window.solana.isPhantom) {
+      if (!window.solana || !window.solana.isPhantom) {
+        alert("Phantom wallet not found. Please install Phantom.");
+        return;
+      }
+      // If not connected, connect
+      if (!window.solana.isConnected) {
         try {
           const resp = await window.solana.connect();
           const pubkey = resp.publicKey.toString();
           walletInfoP.textContent = "Address: " + pubkey;
-          // Save to Firestore under users/{uid}
+          depositMsgP.textContent = "Send SOL to this address above to deposit funds.";
+          connectBtn.textContent = "Disconnect Phantom Wallet";
+          // Save to Firestore
           const uid = auth.currentUser.uid;
-          await db.collection("users").doc(uid).set(
-            { id: uid, pubkey },
-            { merge: true }
-          );
+          await db.collection("users").doc(uid).set({ id: uid, pubkey }, { merge: true });
           updateBalance(pubkey);
+          // Listen for manual disconnect
+          window.solana.on("disconnect", () => resetWalletUI());
         } catch (err) {
           console.error(err);
           alert("Wallet connection failed: " + err.message);
         }
       } else {
-        alert("Phantom wallet not found. Please install Phantom.");
+        // Disconnect logic
+        await window.solana.disconnect();
+        resetWalletUI();
       }
     };
 
-    // 6) Fetch and display SOL balance
+    function resetWalletUI() {
+      walletInfoP.textContent = "";
+      balanceP.textContent = "-- SOL";
+      depositMsgP.textContent = "Connect with Phantom to deposit money.";
+      connectBtn.textContent = "Connect Phantom Wallet";
+    }
+
+    // Fetch and display SOL balance
     async function updateBalance(pubkey) {
       const connection = new solanaWeb3.Connection(
-        "https://api.mainnet-beta.solana.com",
-        "confirmed"
+        "https://api.mainnet-beta.solana.com", "confirmed"
       );
       const balance = await connection.getBalance(
         new solanaWeb3.PublicKey(pubkey)
       );
-      balanceP.textContent = (balance / solanaWeb3.LAMPORTS_PER_SOL)
-        .toFixed(4) + " SOL";
+      balanceP.textContent = (balance / solanaWeb3.LAMPORTS_PER_SOL).toFixed(4) + " SOL";
     }
 
-    // 7) Log out
+    // Log out
     logoutBtn.onclick = () => auth.signOut();
     </script>
   </body>
