@@ -10,31 +10,89 @@
     <!-- Solana Web3.js -->
     <script src="https://unpkg.com/@solana/web3.js@1.73.0/lib/index.iife.js"></script>
     <style>
-      body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; }
-      input, button { font-size: 1rem; padding: .5rem; margin: .3rem 0; }
+      /* Page background and text */
+      body {
+        background: #0D0C0F;
+        color: white;
+        font-family: 'Segoe UI', Roboto, sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+      }
+      /* Auth card */
+      #auth {
+        background: #1A1A1A;
+        padding: 2rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        width: 320px;
+        text-align: center;
+      }
+      /* Headings */
+      #auth h2 {
+        margin-bottom: 1rem;
+        color: white;
+      }
+      /* Inputs */
+      #auth input {
+        width: 100%;
+        padding: 0.75rem;
+        margin-bottom: 0.75rem;
+        border: 1px solid #222222;
+        border-radius: 0.375rem;
+        background: #262626;
+        color: white;
+        font-size: 1rem;
+      }
+      /* Buttons with 6px border */
+      #auth button {
+        width: 100%;
+        padding: 0.75rem;
+        margin-top: 0.5rem;
+        background: #6366F1;
+        color: white;
+        border: 6px solid #222222;
+        border-radius: 0.375rem;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      #auth button:hover {
+        background: #4F46E5;
+      }
+      /* Message text */
+      #auth-msg {
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        color: #F87171;
+      }
+      /* Hide app area until login */
+      #app {
+        display: none;
+        text-align: center;
+      }
     </style>
   </head>
   <body>
-    <h1>Solana Memecoin Wallet</h1>
+    <h1 style="position:absolute; top:1rem; left:1rem; color:white;">Solana Memecoin Wallet</h1>
 
     <div id="auth">
       <h2>Sign Up / Log In</h2>
-      <input id="email"    type="email"    placeholder="Email" /><br/>
-      <input id="password" type="password" placeholder="Password" /><br/>
+      <input id="email"    type="email"    placeholder="Email" />
+      <input id="password" type="password" placeholder="Password" />
       <button id="signup">Sign Up</button>
       <button id="login">Log In</button>
       <div id="auth-msg"></div>
     </div>
 
-    <div id="app" style="display:none;">
+    <div id="app">
       <p>Welcome, <span id="user-email"></span>!  <button id="logout">Log Out</button></p>
-
       <button id="connect-wallet">Connect Phantom Wallet</button>
       <p id="wallet-info"></p>
-
       <h3>Your Balance</h3>
       <p id="balance">-- SOL</p>
-
       <p>To deposit, simply send SOL to your Phantom address above.</p>
     </div>
 
