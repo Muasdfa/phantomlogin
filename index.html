@@ -3,101 +3,198 @@
   <head>
     <meta charset="utf-8" />
     <title>Solana Memecoin Wallet</title>
-    <!-- Firebase SDKs -->
+    <!-- Firebase SDKs (compat) -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <!-- Solana wallet adapter -->
+    <!-- Solana Web3.js -->
     <script src="https://unpkg.com/@solana/web3.js@1.73.0/lib/index.iife.js"></script>
-    <script src="https://unpkg.com/@solana/wallet-adapter-base@0.10.0-rc.14/dist/index.umd.js"></script>
-    <script src="https://unpkg.com/@solana/wallet-adapter-wallets@0.10.0-rc.14/dist/index.umd.js"></script>
-    <script src="https://unpkg.com/@solana/wallet-adapter-phantom@0.10.0-rc.14/dist/index.umd.js"></script>
     <style>
-      body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; }
-      input, button { font-size: 1rem; padding: .5rem; margin: .3rem 0; }
+      /* Page background and text */
+      body {
+        background: #0D0C0F;
+        color: white;
+        font-family: 'Segoe UI', Roboto, sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+      }
+      /* Auth card */
+      #auth {
+        background: #1A1A1A;
+        padding: 2rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        width: 320px;
+        text-align: center;
+      }
+      /* Headings */
+      #auth h2 {
+        margin-bottom: 1rem;
+        color: white;
+      }
+      /* Inputs */
+      #auth input {
+        width: 100%;
+        padding: 0.75rem;
+        margin-bottom: 0.75rem;
+        border: 1px solid #222222;
+        border-radius: 0.375rem;
+        background: #262626;
+        color: white;
+        font-size: 1rem;
+      }
+      /* Buttons with 6px border */
+      #auth button {
+        width: 100%;
+        padding: 0.75rem;
+        margin-top: 0.5rem;
+        background: #6366F1;
+        color: white;
+        border: 6px solid #222222;
+        border-radius: 0.375rem;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      #auth button:hover {
+        background: #4F46E5;
+      }
+      /* Message text */
+      #auth-msg {
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        color: #F87171;
+      }
+      /* Hide app area until login */
+      #app {
+        display: none;
+        text-align: center;
+      }
     </style>
   </head>
   <body>
-    <h1>Solana Memecoin Wallet</h1>
+    <h1 style="position:absolute; top:1rem; left:1rem; color:white;">Solana Memecoin Wallet</h1>
+
     <div id="auth">
       <h2>Sign Up / Log In</h2>
-      <input id="email"    type="email"    placeholder="Email" /><br/>
-      <input id="password" type="password" placeholder="Password" /><br/>
+      <input id="email"    type="email"    placeholder="Email" />
+      <input id="password" type="password" placeholder="Password" />
       <button id="signup">Sign Up</button>
       <button id="login">Log In</button>
       <div id="auth-msg"></div>
     </div>
-    <div id="app" style="display:none;">
-      <p>Welcome, <span id="user-email"></span>!  
-         <button id="logout">Log Out</button></p>
+
+    <div id="app">
+      <p>Welcome, <span id="user-email"></span>!  <button id="logout">Log Out</button></p>
       <button id="connect-wallet">Connect Phantom Wallet</button>
       <p id="wallet-info"></p>
       <h3>Your Balance</h3>
       <p id="balance">-- SOL</p>
       <p>To deposit, simply send SOL to your Phantom address above.</p>
     </div>
+
     <script>
     // 1) Initialize Firebase
     const firebaseConfig = {
-      apiKey:    "YOUR_API_KEY",
-      authDomain:"YOUR_AUTH_DOMAIN",
-      projectId: "YOUR_PROJECT_ID",
-      // …rest of your config…
+      apiKey: "AIzaSyATdSh9jZBAvR6PjV7X-3VVKWZDB2Tld1I",
+      authDomain: "vetra-login-39106.firebaseapp.com",
+      projectId: "vetra-login-39106",
+      storageBucket: "vetra-login-39106.firebasestorage.app",
+      messagingSenderId: "1080730669130",
+      appId: "1:1080730669130:web:fe6bf5694779f4096f16b3",
+      measurementId: "G-0T7NT0E96Z"
     };
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
-    const db   = firebase.firestore();
+    const db = firebase.firestore();
 
-    // 2) Auth handlers
-    const authMsg = document.getElementById("auth-msg");
-    document.getElementById("signup").onclick = () => {
-      const e = email.value, p = password.value;
-      auth.createUserWithEmailAndPassword(e,p)
-        .then(() => authMsg.textContent="Signed up! Please Log In.")
-        .catch(e=>authMsg.textContent=e.message);
+    // 2) Element references
+    const emailInput    = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    const authMsg       = document.getElementById("auth-msg");
+    const authDiv       = document.getElementById("auth");
+    const appDiv        = document.getElementById("app");
+    const userEmailSpan = document.getElementById("user-email");
+    const signupBtn     = document.getElementById("signup");
+    const loginBtn      = document.getElementById("login");
+    const logoutBtn     = document.getElementById("logout");
+    const connectBtn    = document.getElementById("connect-wallet");
+    const walletInfoP   = document.getElementById("wallet-info");
+    const balanceP      = document.getElementById("balance");
+
+    // 3) Auth handlers
+    signupBtn.onclick = () => {
+      auth.createUserWithEmailAndPassword(
+        emailInput.value,
+        passwordInput.value
+      ).then(() => {
+        authMsg.textContent = "Signed up! Please log in.";
+      }).catch(err => {
+        authMsg.textContent = err.message;
+      });
     };
-    document.getElementById("login").onclick = () => {
-      auth.signInWithEmailAndPassword(email.value,password.value)
-        .catch(e=>authMsg.textContent=e.message);
+    loginBtn.onclick = () => {
+      auth.signInWithEmailAndPassword(
+        emailInput.value,
+        passwordInput.value
+      ).catch(err => {
+        authMsg.textContent = err.message;
+      });
     };
 
-    // 3) On auth state change
+    // 4) Auth state listener
     auth.onAuthStateChanged(user => {
-      if (!user) {
-        document.getElementById("auth").style.display = "block";
-        document.getElementById("app").style.display  = "none";
-        return;
+      if (user) {
+        authDiv.style.display = "none";
+        appDiv.style.display  = "block";
+        userEmailSpan.textContent = user.email;
+      } else {
+        authDiv.style.display = "block";
+        appDiv.style.display  = "none";
       }
-      document.getElementById("auth").style.display = "none";
-      document.getElementById("app").style.display  = "block";
-      userEmail.textContent = user.email;
     });
 
-    // 4) Connect Phantom
-    const { Connection, PublicKey } = solanaWeb3;
-    const { PhantomWalletAdapter } = window["@solana/wallet-adapter-phantom"];
-    const conn = new Connection("https://api.mainnet-beta.solana.com", "confirmed");
-    let walletAdapter = null;
-
-    document.getElementById("connect-wallet").onclick = async () => {
-      walletAdapter = new PhantomWalletAdapter();
-      await walletAdapter.connect();
-      const pubkey = walletAdapter.publicKey.toString();
-      walletInfo.textContent = "Address: " + pubkey;
-      // save to Firestore under users/{uid}
-      const uid = auth.currentUser.uid;
-      await db.collection("users").doc(uid).set({ id: uid, pubkey }, { merge:true });
-      updateBalance(pubkey);
+    // 5) Connect Phantom and fetch pubkey
+    connectBtn.onclick = async () => {
+      if (window.solana && window.solana.isPhantom) {
+        try {
+          const resp = await window.solana.connect();
+          const pubkey = resp.publicKey.toString();
+          walletInfoP.textContent = "Address: " + pubkey;
+          // Save to Firestore under users/{uid}
+          const uid = auth.currentUser.uid;
+          await db.collection("users").doc(uid).set(
+            { id: uid, pubkey },
+            { merge: true }
+          );
+          updateBalance(pubkey);
+        } catch (err) {
+          console.error(err);
+          alert("Wallet connection failed: " + err.message);
+        }
+      } else {
+        alert("Phantom wallet not found. Please install Phantom.");
+      }
     };
 
-    // 5) Fetch balance
+    // 6) Fetch and display SOL balance
     async function updateBalance(pubkey) {
-      const bal = await conn.getBalance(new PublicKey(pubkey));
-      balance.textContent = (bal/1e9).toFixed(4) + " SOL";
+      const connection = new solanaWeb3.Connection(
+        "https://api.mainnet-beta.solana.com",
+        "confirmed"
+      );
+      const balance = await connection.getBalance(
+        new solanaWeb3.PublicKey(pubkey)
+      );
+      balanceP.textContent = (balance / solanaWeb3.LAMPORTS_PER_SOL)
+        .toFixed(4) + " SOL";
     }
 
-    // 6) Log out
-    document.getElementById("logout").onclick = () => auth.signOut();
+    // 7) Log out
+    logoutBtn.onclick = () => auth.signOut();
     </script>
   </body>
 </html>
