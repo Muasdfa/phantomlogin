@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Solana Memecoin Wallet</title>
+    <title>Connect to Account</title>
     <!-- Firebase SDKs (compat) -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -16,13 +16,20 @@
         color: white;
         font-family: 'Segoe UI', Roboto, sans-serif;
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
         height: 100vh;
         margin: 0;
+        text-align: center;
       }
-      /* Auth card */
-      #auth {
+      /* Main heading */
+      h1 {
+        margin-bottom: 2rem;
+        font-size: 2rem;
+      }
+      /* Auth and App cards */
+      #auth, #app {
         background: #1A1A1A;
         padding: 2rem;
         border-radius: 0.5rem;
@@ -30,13 +37,8 @@
         width: 320px;
         text-align: center;
       }
-      /* Headings */
-      #auth h2 {
-        margin-bottom: 1rem;
-        color: white;
-      }
       /* Inputs */
-      #auth input {
+      input {
         width: 100%;
         padding: 0.75rem;
         margin-bottom: 0.75rem;
@@ -47,7 +49,7 @@
         font-size: 1rem;
       }
       /* Buttons with 6px border */
-      #auth button, #app button {
+      button {
         width: 100%;
         padding: 0.75rem;
         margin-top: 0.5rem;
@@ -59,7 +61,7 @@
         cursor: pointer;
         transition: background 0.2s;
       }
-      #auth button:hover, #app button:hover {
+      button:hover {
         background: #4F46E5;
       }
       /* Message text */
@@ -71,12 +73,6 @@
       /* Hide app area until login */
       #app {
         display: none;
-        background: #1A1A1A;
-        padding: 2rem;
-        border-radius: 0.5rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-        width: 320px;
-        text-align: center;
       }
       #app h3 {
         margin-top: 1rem;
@@ -87,7 +83,7 @@
     </style>
   </head>
   <body>
-    <h1 style="position:absolute; top:1rem; left:1rem; color:white;">Solana Memecoin Wallet</h1>
+    <h1>Connect to Account</h1>
 
     <div id="auth">
       <h2>Sign Up / Log In</h2>
@@ -169,7 +165,6 @@
         alert("Phantom wallet not found. Please install Phantom.");
         return;
       }
-      // If not connected, connect
       if (!window.solana.isConnected) {
         try {
           const resp = await window.solana.connect();
@@ -177,18 +172,15 @@
           walletInfoP.textContent = "Address: " + pubkey;
           depositMsgP.textContent = "Send SOL to this address above to deposit funds.";
           connectBtn.textContent = "Disconnect Phantom Wallet";
-          // Save to Firestore
           const uid = auth.currentUser.uid;
           await db.collection("users").doc(uid).set({ id: uid, pubkey }, { merge: true });
           updateBalance(pubkey);
-          // Listen for manual disconnect
           window.solana.on("disconnect", () => resetWalletUI());
         } catch (err) {
           console.error(err);
           alert("Wallet connection failed: " + err.message);
         }
       } else {
-        // Disconnect logic
         await window.solana.disconnect();
         resetWalletUI();
       }
@@ -201,7 +193,6 @@
       connectBtn.textContent = "Connect Phantom Wallet";
     }
 
-    // Fetch and display SOL balance
     async function updateBalance(pubkey) {
       const connection = new solanaWeb3.Connection(
         "https://api.mainnet-beta.solana.com", "confirmed"
@@ -212,7 +203,6 @@
       balanceP.textContent = (balance / solanaWeb3.LAMPORTS_PER_SOL).toFixed(4) + " SOL";
     }
 
-    // Log out
     logoutBtn.onclick = () => auth.signOut();
     </script>
   </body>
