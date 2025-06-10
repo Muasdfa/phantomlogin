@@ -1,209 +1,200 @@
 <!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Connect to Account</title>
-    <!-- Favicon -->
-    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
-    <!-- Firebase SDKs (compat) -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <!-- Solana Web3.js -->
-    <script src="https://unpkg.com/@solana/web3.js@1.73.0/lib/index.iife.js"></script>
-    <style>
-      /* Page background and text */
-      body {
-        background: #0D0C0F;
-        color: white;
-        font-family: 'Segoe UI', Roboto, sans-serif;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        height: 100vh;
-        margin: 0;
-        text-align: center;
-      }
-      /* Main heading */
-      h1 {
-        margin-bottom: 2rem;
-        font-size: 2rem;
-      }
-      /* Auth and App cards centered content */
-      #auth, #app {
-        background: #1A1A1A;
-        padding: 2rem;
-        border-radius: 0.5rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-        width: 320px;
-        text-align: center;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        min-height: 350px;
-      }
-      /* Hide #app by default, #auth shown */
-      #app {
-        display: none;
-      }
-      /* Inputs */
-      input {
-        width: 100%;
-        padding: 0.75rem;
-        margin-bottom: 0.75rem;
-        border: 1px solid #222222;
-        border-radius: 0.375rem;
-        background: #262626;
-        color: white;
-        font-size: 1rem;
-      }
-      /* Buttons with 6px border */
-      button {
-        width: 100%;
-        padding: 0.75rem;
-        margin-top: 0.5rem;
-        background: #6366F1;
-        color: white;
-        border: 6px solid #222222;
-        border-radius: 0.375rem;
-        font-size: 1rem;
-        cursor: pointer;
-        transition: background 0.2s;
-      }
-      button:hover {
-        background: #4F46E5;
-      }
-      /* Message text */
-      #auth-msg {
-        margin-top: 0.5rem;
-        font-size: 0.9rem;
-        color: #F87171;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>Connect to Account</h1>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Connect to Account</title>
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico" type="image/x-icon" />
 
-    <div id="auth">
-      <h2>Sign Up / Log In</h2>
-      <input id="email" type="email" placeholder="Email" />
-      <input id="password" type="password" placeholder="Password" />
-      <button id="signup">Sign Up</button>
-      <button id="login">Log In</button>
-      <div id="auth-msg"></div>
-    </div>
+  <!-- Firebase SDKs (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <!-- Solana Web3.js -->
+  <script src="https://unpkg.com/@solana/web3.js@1.73.0/lib/index.iife.js"></script>
 
-    <div id="app">
-      <p>Welcome, <span id="user-email"></span>!</p>
-      <button id="logout">Log Out</button>
+  <style>
+    /* Full-page layout */
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #0D0C0F;
+      color: white;
+      font-family: 'Segoe UI', Roboto, sans-serif;
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 2rem;
+      font-size: 2rem;
+    }
+    /* Card container for auth and app */
+    .card {
+      background: #1A1A1A;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      width: 320px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+    }
+    /* Inputs */
+    input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #222222;
+      border-radius: 4px;
+      background: #262626;
+      color: white;
+      font-size: 1rem;
+    }
+    /* Buttons */
+    button {
+      width: 100%;
+      padding: 0.75rem;
+      background: #6366F1;
+      color: white;
+      border: 6px solid #222222;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #4F46E5;
+    }
+    /* Message text */
+    .message {
+      font-size: 0.9rem;
+      color: #F87171;
+      min-height: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Connect to Account</h1>
+  <!-- Authentication Card -->
+  <div id="auth" class="card">
+    <h2>Sign Up / Log In</h2>
+    <input id="email" type="email" placeholder="Email" />
+    <input id="password" type="password" placeholder="Password" />
+    <button id="signup">Sign Up</button>
+    <button id="login">Log In</button>
+    <div id="auth-msg" class="message"></div>
+  </div>
+  <!-- App Card (hidden until login) -->
+  <div id="app" class="card" style="display:none;">
+    <p>Welcome, <span id="user-email"></span>!</p>
+    <button id="logout">Log Out</button>
+    <button id="connect-wallet">Connect Phantom Wallet</button>
+    <p id="wallet-info"></p>
+    <h3>Your Balance</h3>
+    <p id="balance">-- SOL</p>
+    <p id="deposit-msg">Connect with Phantom to deposit money.</p>
+  </div>
 
-      <button id="connect-wallet">Connect Phantom Wallet</button>
-      <p id="wallet-info"></p>
+  <script>
+    // === Firebase Initialization ===
+    const firebaseConfig = {
+      apiKey: "AIzaSyATdSh9jZBAvR6PjV7X-3VVKWZDB2Tld1I",
+      authDomain: "vetra-login-39106.firebaseapp.com",
+      projectId: "vetra-login-39106",
+      storageBucket: "vetra-login-39106.firebasestorage.app",
+      messagingSenderId: "1080730669130",
+      appId: "1:1080730669130:web:fe6bf5694779f4096f16b3",
+      measurementId: "G-0T7NT0E96Z"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
-      <h3>Your Balance</h3>
-      <p id="balance">-- SOL</p>
+    // === Element References ===
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const authMsg = document.getElementById('auth-msg');
+    const authDiv = document.getElementById('auth');
+    const appDiv = document.getElementById('app');
+    const userEmailSpan = document.getElementById('user-email');
+    const signupBtn = document.getElementById('signup');
+    const loginBtn = document.getElementById('login');
+    const logoutBtn = document.getElementById('logout');
+    const connectBtn = document.getElementById('connect-wallet');
+    const walletInfoP = document.getElementById('wallet-info');
+    const balanceP = document.getElementById('balance');
+    const depositMsgP = document.getElementById('deposit-msg');
 
-      <p id="deposit-msg">Connect with Phantom to deposit money.</p>
-    </div>
-
-    <script>
-      // Initialize Firebase
-      const firebaseConfig = {
-        apiKey: "AIzaSyATdSh9jZBAvR6PjV7X-3VVKWZDB2Tld1I",
-        authDomain: "vetra-login-39106.firebaseapp.com",
-        projectId: "vetra-login-39106",
-        storageBucket: "vetra-login-39106.firebasestorage.app",
-        messagingSenderId: "1080730669130",
-        appId: "1:1080730669130:web:fe6bf5694779f4096f16b3",
-        measurementId: "G-0T7NT0E96Z"
-      };
-      firebase.initializeApp(firebaseConfig);
-      const auth = firebase.auth();
-      const db = firebase.firestore();
-
-      // Element refs
-      const emailInput = document.getElementById('email');
-      const passwordInput = document.getElementById('password');
-      const authMsg = document.getElementById('auth-msg');
-      const authDiv = document.getElementById('auth');
-      const appDiv = document.getElementById('app');
-      const userEmailSpan = document.getElementById('user-email');
-      const signupBtn = document.getElementById('signup');
-      const loginBtn = document.getElementById('login');
-      const logoutBtn = document.getElementById('logout');
-      const connectBtn = document.getElementById('connect-wallet');
-      const walletInfoP = document.getElementById('wallet-info');
-      const balanceP = document.getElementById('balance');
-      const depositMsgP = document.getElementById('deposit-msg');
-
-      // Auth handlers
-      signupBtn.onclick = () => auth.createUserWithEmailAndPassword(
+    // === Auth Handlers ===
+    signupBtn.onclick = () => {
+      auth.createUserWithEmailAndPassword(
         emailInput.value, passwordInput.value
       ).then(() => authMsg.textContent = 'Signed up! Please log in.')
        .catch(err => authMsg.textContent = err.message);
-
-      loginBtn.onclick = () => auth.signInWithEmailAndPassword(
+    };
+    loginBtn.onclick = () => {
+      auth.signInWithEmailAndPassword(
         emailInput.value, passwordInput.value
       ).catch(err => authMsg.textContent = err.message);
+    };
 
-      // Listen for auth state and toggle visibility without overriding flex display
-      auth.onAuthStateChanged(user => {
-        if (user) {
-          authDiv.style.display = 'none';
-          appDiv.style.display = ''; // uses CSS display:flex
-          userEmailSpan.textContent = user.email;
-        } else {
-          authDiv.style.display = ''; // uses CSS display:flex
-          appDiv.style.display = 'none';
-        }
-      });
-
-      // Wallet connect/disconnect logic
-      connectBtn.onclick = async () => {
-        if (!window.solana || !window.solana.isPhantom) {
-          return alert('Phantom wallet not found. Please install Phantom.');
-        }
-        if (!window.solana.isConnected) {
-          try {
-            const resp = await window.solana.connect();
-            const pubkey = resp.publicKey.toString();
-            walletInfoP.textContent = 'Address: ' + pubkey;
-            depositMsgP.textContent = 'Send SOL to this address above to deposit funds.';
-            connectBtn.textContent = 'Disconnect Phantom Wallet';
-            const uid = auth.currentUser.uid;
-            await db.collection('users').doc(uid).set({ id: uid, pubkey }, { merge: true });
-            updateBalance(pubkey);
-            window.solana.on('disconnect', resetWalletUI);
-          } catch (err) {
-            console.error(err);
-            alert('Wallet connection failed: ' + err.message);
-          }
-        } else {
-          await window.solana.disconnect();
-          resetWalletUI();
-        }
-      };
-
-      function resetWalletUI() {
-        walletInfoP.textContent = '';
-        balanceP.textContent = '-- SOL';
-        depositMsgP.textContent = 'Connect with Phantom to deposit money.';
-        connectBtn.textContent = 'Connect Phantom Wallet';
+    // === Auth State Listener ===
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        authDiv.style.display = 'none';
+        appDiv.style.display = 'flex';
+        userEmailSpan.textContent = user.email;
+      } else {
+        authDiv.style.display = 'flex';
+        appDiv.style.display = 'none';
       }
+    });
 
-      async function updateBalance(pubkey) {
-        const connection = new solanaWeb3.Connection(
-          'https://api.mainnet-beta.solana.com', 'confirmed'
-        );
-        const balance = await connection.getBalance(
-          new solanaWeb3.PublicKey(pubkey)
-        );
-        balanceP.textContent = (balance / solanaWeb3.LAMPORTS_PER_SOL).toFixed(4) + ' SOL';
+    // === Phantom Connect Logic ===
+    connectBtn.onclick = async () => {
+      if (!window.solana || !window.solana.isPhantom) {
+        return alert('Please install Phantom Wallet.');
       }
+      if (!window.solana.isConnected) {
+        try {
+          const resp = await window.solana.connect();
+          const pubkey = resp.publicKey.toString();
+          walletInfoP.textContent = 'Address: ' + pubkey;
+          depositMsgP.textContent = 'Send SOL to this address above to deposit funds.';
+          connectBtn.textContent = 'Disconnect Phantom Wallet';
+          const uid = auth.currentUser.uid;
+          await db.collection('users').doc(uid).set({ id: uid, pubkey }, { merge: true });
+          updateBalance(pubkey);
+          window.solana.on('disconnect', resetWalletUI);
+        } catch (err) {
+          alert('Connection failed: ' + err.message);
+        }
+      } else {
+        await window.solana.disconnect();
+        resetWalletUI();
+      }
+    };
 
-      logoutBtn.onclick = () => auth.signOut();
-    </script>
-  </body>
+    function resetWalletUI() {
+      walletInfoP.textContent = '';
+      balanceP.textContent = '-- SOL';
+      depositMsgP.textContent = 'Connect with Phantom to deposit money.';
+      connectBtn.textContent = 'Connect Phantom Wallet';
+    }
+
+    async function updateBalance(pubkey) {
+      const conn = new solanaWeb3.Connection('https://api.mainnet-beta.solana.com', 'confirmed');
+      const bal = await conn.getBalance(new solanaWeb3.PublicKey(pubkey));
+      balanceP.textContent = (bal / solanaWeb3.LAMPORTS_PER_SOL).toFixed(4) + ' SOL';
+    }
+
+    // === Logout ===
+    logoutBtn.onclick = () => auth.signOut();
+  </script>
+</body>
 </html>
